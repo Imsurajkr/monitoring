@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: monitoring
+  labels:
+    app: prometheus
+  name: thanos-sidecar
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+    service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: "false"
+    service.beta.kubernetes.io/aws-load-balancer-connection-draining-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-connection-draining-timeout: "60"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "60"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "30"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "5"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "4"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "3"
+    service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "ENV=CHANGEME,SVC=thanos-sidecar,Name=thanos-sidecar-elb-Dev"
+    service.beta.kubernetes.io/aws-load-balancer-security-groups: "sg-CHANGEME"
+    external-dns.alpha.kubernetes.io/hostname: thanos-sidecar-ev-devops.dev.CHANGEME.com
+
+spec:
+  ports:
+    - port: 30903
+      protocol: TCP
+      targetPort: grpc
+      name: grpc
+      nodePort: 30903
+  selector:
+    statefulset.kubernetes.io/pod-name: prometheus-prometheus-prometheus-oper-prometheus-0
+  type: LoadBalancer
